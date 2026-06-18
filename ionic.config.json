@@ -1,0 +1,7 @@
+{
+  "name": "pjla_resumo_financeiro",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
