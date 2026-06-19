@@ -1,9 +1,20 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'pjla_resumo_financeiro',
-  webDir: 'dist'
+  "appId": "com.financeiro.medicapj",
+  "appName": "Resumo Financeiro",
+  "webDir": "build",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "CapacitorSQLite": {
+      "iosDatabaseLocation": "Library/CapacitorDatabase",
+      "androidDatabaseLocation": "default"
+    }
+  }
 };
 
 export default config;
+
+
