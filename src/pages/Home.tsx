@@ -38,7 +38,7 @@ const Home: React.FC = () => {
       <IonHeader>
         <IonToolbar style={{ '--background': '#f5edf7' } as any}>
           <IonTitle style={{ color: '#6b4a8c', fontWeight: 'bold' }}>
-            💰 Médica PJ
+            💰 PJLA Resumo Financeiro
           </IonTitle>
         </IonToolbar>
       </IonHeader>
