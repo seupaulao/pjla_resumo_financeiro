@@ -20,6 +20,7 @@ import {
   setupIonicReact,
 } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 import Detalhes from './pages/Detalhes';
 import Historico from './pages/Historico';
@@ -27,23 +28,34 @@ import Home from './pages/Home';
 import { IonReactRouter } from '@ionic/react-router';
 import NovaSimulacao from './pages/NovaSimulacao';
 import React from 'react';
+import { database } from './services/database';
 
 setupIonicReact();
 
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet>
-        <Route exact path="/">
-          <Redirect to="/home" />
-        </Route>
-        <Route path="/home" component={Home} exact />
-        <Route path="/nova-simulacao" component={NovaSimulacao} exact />
-        <Route path="/historico" component={Historico} exact />
-        <Route path="/detalhes/:id" component={Detalhes} exact />
-      </IonRouterOutlet>
-    </IonReactRouter>
-  </IonApp>
-);
+const App: React.FC = () => {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    database.init().then(() => setReady(true));
+  }, []);
+
+  if (!ready) return null;
+
+  return (
+    <IonApp>
+      <IonReactRouter>
+        <IonRouterOutlet>
+          <Route exact path="/">
+            <Redirect to="/home" />
+          </Route>
+          <Route path="/home" component={Home} exact />
+          <Route path="/nova-simulacao" component={NovaSimulacao} exact />
+          <Route path="/historico" component={Historico} exact />
+          <Route path="/detalhes/:id" component={Detalhes} exact />
+        </IonRouterOutlet>
+      </IonReactRouter>
+    </IonApp>
+  );
+};
 
 export default App;

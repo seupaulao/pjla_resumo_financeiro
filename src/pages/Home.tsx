@@ -14,12 +14,24 @@ import {
   IonToolbar,
   useIonRouter,
 } from '@ionic/react';
-import { addCircleOutline, listOutline } from 'ionicons/icons';
+import { addCircleOutline, barChartOutline, cashOutline, listOutline, walletOutline } from 'ionicons/icons';
+import React, { useEffect, useState } from 'react';
 
-import React from 'react';
+import { Simulacao } from '../types';
+import { database } from '../services/database';
+import { formatCurrency } from '../utils/calculos';
 
 const Home: React.FC = () => {
   const router = useIonRouter();
+  const [simulacoes, setSimulacoes] = useState<Simulacao[]>([]);
+
+  useEffect(() => {
+    database.listarSimulacoes().then(setSimulacoes).catch(() => {});
+  }, []);
+
+  const totalTributos = simulacoes.reduce((acc, s) => acc + s.das + s.inss + s.irrf, 0);
+  const totalLiquido = simulacoes.reduce((acc, s) => acc + s.totalLiquido, 0);
+  const ultimaSimulacao = simulacoes.length > 0 ? simulacoes[0] : null;
 
   return (
     <IonPage>
@@ -35,8 +47,8 @@ const Home: React.FC = () => {
         <IonGrid style={{ padding: '16px' }}>
           <IonRow>
             <IonCol size="12">
-              <IonCard style={{ 
-                borderRadius: '16px', 
+              <IonCard style={{
+                borderRadius: '16px',
                 background: 'linear-gradient(135deg, #e8ddf2, #d8c8e8)',
                 boxShadow: '0 4px 12px rgba(156, 123, 184, 0.2)',
               }}>
@@ -54,6 +66,44 @@ const Home: React.FC = () => {
               </IonCard>
             </IonCol>
           </IonRow>
+
+          {ultimaSimulacao && (
+            <IonRow>
+              <IonCol size="6">
+                <div style={{ background: '#f3edf7', borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
+                  <IonIcon icon={barChartOutline} style={{ color: '#9c7bb8', fontSize: '22px' }} />
+                  <IonText style={{ display: 'block', fontSize: '0.75rem', color: '#7a5a9c', marginTop: '4px' }}>
+                    Simulações
+                  </IonText>
+                  <IonText style={{ display: 'block', fontSize: '1.2rem', fontWeight: 'bold', color: '#6b4a8c' }}>
+                    {simulacoes.length}
+                  </IonText>
+                </div>
+              </IonCol>
+              <IonCol size="6">
+                <div style={{ background: '#fde8e8', borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
+                  <IonIcon icon={cashOutline} style={{ color: '#e8a0a0', fontSize: '22px' }} />
+                  <IonText style={{ display: 'block', fontSize: '0.75rem', color: '#c97a7a', marginTop: '4px' }}>
+                    Total Tributos
+                  </IonText>
+                  <IonText style={{ display: 'block', fontSize: '1.2rem', fontWeight: 'bold', color: '#b86a6a' }}>
+                    {formatCurrency(totalTributos)}
+                  </IonText>
+                </div>
+              </IonCol>
+              <IonCol size="12" style={{ marginTop: '8px' }}>
+                <div style={{ background: '#e8f0e8', borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
+                  <IonIcon icon={walletOutline} style={{ color: '#80a080', fontSize: '22px' }} />
+                  <IonText style={{ display: 'block', fontSize: '0.75rem', color: '#608060', marginTop: '4px' }}>
+                    Total Líquido Acumulado
+                  </IonText>
+                  <IonText style={{ display: 'block', fontSize: '1.2rem', fontWeight: 'bold', color: '#4a804a' }}>
+                    {formatCurrency(totalLiquido)}
+                  </IonText>
+                </div>
+              </IonCol>
+            </IonRow>
+          )}
 
           <IonRow>
             <IonCol size="12" style={{ marginTop: '16px' }}>

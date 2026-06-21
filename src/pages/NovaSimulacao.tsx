@@ -6,9 +6,9 @@ import {
   IonContent,
   IonHeader,
   IonPage,
-  IonText,
   IonTitle,
   IonToolbar,
+  useIonToast,
 } from '@ionic/react';
 import React, { useState } from 'react';
 
@@ -16,20 +16,23 @@ import ExportarButtons from '../components/ExportarButtons';
 import FinanceiroForm from '../components/FinanceiroForm';
 import ResumoCard from '../components/ResumoCard';
 import { calcularSimulacao } from '../utils/calculos';
+import { database } from '../services/database';
 
 const NovaSimulacao: React.FC = () => {
   const [simulacao, setSimulacao] = useState<Simulacao | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [present] = useIonToast();
 
-  const handleSubmit = (dados: DadosEntrada) => {
+  const handleSubmit = async (dados: DadosEntrada) => {
+    setLoading(true);
+
     const resultado = calcularSimulacao(
       dados.receita,
       dados.rbt12,
       dados.percentualProLabore
     );
 
-    const novaSimulacao: Simulacao = {
-      id: Math.random(),
-      data: new Date().toISOString(),
+    const dadosSimulacao = {
       receita: dados.receita,
       rbt12: dados.rbt12,
       percentualProLabore: dados.percentualProLabore,
@@ -37,7 +40,33 @@ const NovaSimulacao: React.FC = () => {
       ...resultado,
     };
 
-    setSimulacao(novaSimulacao);
+    try {
+      const newId = await database.salvarSimulacao(dadosSimulacao);
+
+      const novaSimulacao: Simulacao = {
+        id: newId,
+        data: new Date().toISOString(),
+        ...dadosSimulacao,
+      };
+
+      setSimulacao(novaSimulacao);
+
+      present({
+        message: 'Simulação salva com sucesso!',
+        duration: 2000,
+        color: 'success',
+        position: 'bottom',
+      });
+    } catch (error) {
+      present({
+        message: 'Erro ao salvar simulação',
+        duration: 3000,
+        color: 'danger',
+        position: 'bottom',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -56,7 +85,7 @@ const NovaSimulacao: React.FC = () => {
       <IonContent style={{ '--background': '#faf5ff' } as any}>
         <div style={{ padding: '16px' }}>
           {!simulacao ? (
-            <FinanceiroForm onSubmit={handleSubmit} loading={false} />
+            <FinanceiroForm onSubmit={handleSubmit} loading={loading} />
           ) : (
             <>
               <ResumoCard simulacao={simulacao} />

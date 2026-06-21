@@ -1,4 +1,3 @@
-import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import {
   IonButton,
   IonCol,
@@ -82,35 +81,27 @@ ${descricao ? `**Descrição:** ${descricao}\n` : ''}
 ${formatDate(data)};${receita.toFixed(2)};${rbt12.toFixed(2)};${(percentualProLabore * 100).toFixed(0)}%;${das.toFixed(2)};${inss.toFixed(2)};${irrf.toFixed(2)};${prolaboreBruto.toFixed(2)};${prolaboreLiquido.toFixed(2)};${lucroDistribuivel.toFixed(2)};${totalLiquido.toFixed(2)}`;
   };
 
-  const exportarArquivo = async (conteudo: string, tipo: 'md' | 'csv') => {
-    try {
-      const filename = `resumo_${Date.now()}.${tipo}`;
-      const mimeType = tipo === 'md' ? 'text/markdown' : 'text/csv';
-      
-      await Filesystem.writeFile({
-        path: filename,
-        data: conteudo,
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-      });
+  const exportarArquivo = (conteudo: string, tipo: 'md' | 'csv') => {
+    const sugestaoNome = `resumo_financeiro_${simulacao.data.slice(0, 10)}.${tipo}`;
+    const mimeType = tipo === 'md' ? 'text/markdown' : 'text/csv';
 
-      present({
-        message: `Arquivo ${filename} salvo com sucesso!`,
-        duration: 3000,
-        color: 'success',
-        position: 'bottom',
-      });
-    } catch (error) {
-      present({
-        message: 'Erro ao exportar arquivo',
-        duration: 3000,
-        color: 'danger',
-        position: 'bottom',
-      });
-    }
+    const blob = new Blob([conteudo], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = sugestaoNome;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    present({
+      message: 'Download iniciado — escolha onde salvar o arquivo',
+      duration: 3000,
+      color: 'success',
+      position: 'bottom',
+    });
   };
 
-  const compartilhar = async (conteudo: string, tipo: 'md' | 'csv') => {
+  const compartilhar = async (conteudo: string) => {
     try {
       await Share.share({
         title: `Resumo Financeiro - ${formatDate(simulacao.data)}`,
@@ -169,7 +160,7 @@ ${formatDate(data)};${receita.toFixed(2)};${rbt12.toFixed(2)};${(percentualProLa
               '--border-radius': '12px',
               '--color': '#fff',
             } as any}
-            onClick={() => compartilhar(gerarMarkdown(), 'md')}
+            onClick={() => compartilhar(gerarMarkdown())}
           >
             <IonIcon slot="start" icon={shareOutline} />
             Compartilhar
